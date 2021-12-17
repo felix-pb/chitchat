@@ -1,0 +1,38 @@
+[package]
+name = "chitchat"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# used for web server framework
+axum = { version = "0.4", features = ["ws"] }
+
+# used for splitting sender/receiver halves of websocket
+futures = "0.3"
+
+# used for more efficient mutex
+parking_lot = "0.11"
+
+# used for generating random passwords
+rand = "0.8.0"
+
+# used for serializing/deserializing json
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# used for parsing command-line arguments
+structopt = "0.3"
+
+# used for async runtime
+tokio = { version = "1", features = ["full"] }
+
+# used for http middleware
+tower-http = { version = "0.2", features = ["fs"] }
+
+# used for logging
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+[dev-dependencies]
+# used for testing endpoints
+reqwest = { version = "0.11", features = ["json"] }
