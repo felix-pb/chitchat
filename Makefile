@@ -1,8 +1,11 @@
+IMAGE := chitchat:latest
+CONTAINER := chitchat-app
+
 build:
-	docker build -t chitchat .
+	docker build -t ${IMAGE} .
 
 run:
-	docker run -dp 3000:3000 --name chitchat-app --rm chitchat
+	docker run -dp 3000:3000 --init --name ${CONTAINER} --rm ${IMAGE}
 
 stop:
-	docker stop chitchat-app
+	docker stop ${CONTAINER}
