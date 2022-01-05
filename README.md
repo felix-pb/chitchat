@@ -10,7 +10,7 @@ This project is built with:
 - [Docker][5] for packaging
 
 Note: I'd be thrilled to use [Vue 3][6] and [Tailwind CSS][7].
-I had prior experience with Vuetify so I used here for quick prototyping.
+I had prior experience with Vuetify so I used it here for quick prototyping.
 
 [1]: https://vuejs.org/
 [2]: https://vuetifyjs.com/en/
