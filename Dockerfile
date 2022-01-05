@@ -1,4 +1,4 @@
-FROM node:16.13 as build-frontend
+FROM node:16.13.1 as build-frontend
 WORKDIR /frontend
 # install and cache dependencies
 COPY vue/package.json vue/package-lock.json ./
@@ -8,7 +8,7 @@ COPY vue .
 RUN npm run build
 
 
-FROM rust:1.57 as build-backend
+FROM rust:1.57.0 as build-backend
 WORKDIR /backend
 # install and cache dependencies
 RUN cargo init

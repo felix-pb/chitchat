@@ -31,9 +31,9 @@ Top-level project structure:
 
 # Requirements
 
-- Docker: https://docs.docker.com/get-docker/
-- Node: https://github.com/Schniz/fnm/
-- Rust: https://www.rust-lang.org/tools/install/
+- Docker (latest): https://docs.docker.com/get-docker/
+- Node (16.13.1): https://github.com/Schniz/fnm/ or https://github.com/nvm-sh/nvm/
+- Rust (1.57.0): https://www.rust-lang.org/tools/install/
 
 # How to build and run the app?
 
