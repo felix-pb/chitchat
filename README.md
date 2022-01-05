@@ -10,8 +10,7 @@ This project is built with:
 - [Docker][5] for packaging
 
 Note: I'd be thrilled to use [Vue 3][6] and [Tailwind CSS][7].
-However, it seems that you need to pay for [Tailwind UI][8] to get the most out of it.
-Therefore, I ended up choosing Vuetify because it's free and I had prior experience with it.
+I had prior experience with Vuetify so I used here for quick prototyping.
 
 [1]: https://vuejs.org/
 [2]: https://vuetifyjs.com/en/
