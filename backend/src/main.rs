@@ -13,6 +13,8 @@ use axum::{AddExtensionLayer, Router, Server};
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::sync::broadcast::Sender;
+use tower::ServiceBuilder;
+use tower_http::cors::{any, CorsLayer};
 use tower_http::services::{ServeDir, ServeFile};
 
 /// This struct holds the global state shared across all route handlers
@@ -69,7 +71,16 @@ fn make_app_router() -> Router {
         .nest("/messages", messages::make_router())
         .nest("/users", users::make_router())
         .nest("/websocket", websocket::make_router())
-        .layer(AddExtensionLayer::new(state))
+        .layer(
+            ServiceBuilder::new()
+                .layer(
+                    CorsLayer::new()
+                        .allow_headers(any())
+                        .allow_methods(any())
+                        .allow_origin(any()),
+                )
+                .layer(AddExtensionLayer::new(state)),
+        )
 }
 
 /// This function wraps IO errors when serving static file requests

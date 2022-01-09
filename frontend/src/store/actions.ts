@@ -17,29 +17,29 @@ type Context = ActionContext<State, State>;
 export default {
   createUser(context: Context): void {
     axios
-      .post("/users")
+      .post("http://localhost:3000/users")
       .then((response) => context.commit("setUser", response.data))
       .catch((error) => errorHandler(context, error.response.data));
   },
   readMessages(context: Context): void {
     axios
-      .get("/messages")
+      .get("http://localhost:3000/messages")
       .then((response) => context.commit("setMessages", response.data))
       .catch((error) => errorHandler(context, error.response.data));
   },
   createMessage(context: Context, params: CreateMessageParams): void {
     axios
-      .post("/messages", params)
+      .post("http://localhost:3000/messages", params)
       .catch((error) => errorHandler(context, error.response.data));
   },
   updateMessage(context: Context, params: UpdateMessageParams): void {
     axios
-      .put("/messages", params)
+      .put("http://localhost:3000/messages", params)
       .catch((error) => errorHandler(context, error.response.data));
   },
   deleteMessage(context: Context, params: DeleteMessageParams): void {
     axios
-      .delete("/messages", { data: params })
+      .delete("http://localhost:3000/messages", { data: params })
       .catch((error) => errorHandler(context, error.response.data));
   },
 };

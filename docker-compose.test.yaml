@@ -1,16 +1,25 @@
 version: '3'
 
 services:
-  app:
+  # backend service
+  backend:
     build:
-      context: .
-      target: build-backend
+      context: ./backend
+      dockerfile: Dockerfile.test
     command: cargo test -- --test-threads=1
+    depends_on:
+      - postgres
+
+  # postgres service
   postgres:
-    image: postgres:latest
+    build:
+      context: ./postgres
     environment:
       - POSTGRES_PASSWORD=password
     ports:
       - 5432:5432
     volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - data:/var/lib/postgresql/data
+
+volumes:
+  data:
