@@ -8,46 +8,34 @@ mod websocket;
 use crate::database::{Database, Message};
 use axum::extract::Extension;
 use axum::http::StatusCode;
-use axum::response::IntoResponse;
 use axum::routing::get_service;
 use axum::{AddExtensionLayer, Router, Server};
-use parking_lot::Mutex;
 use std::net::SocketAddr;
 use std::sync::Arc;
-use structopt::StructOpt;
 use tokio::sync::broadcast::Sender;
 use tower_http::services::{ServeDir, ServeFile};
-
-/// A simple web app to engage in trivial matters, i.e. to chitchat.
-#[derive(StructOpt)]
-struct Opt {
-    /// The maximum number of messages stored in the database.
-    /// By default, if not specified, all messages are stored forever.
-    #[structopt(long, short)]
-    max_history: Option<usize>,
-}
 
 /// This struct holds the global state shared across all route handlers
 /// and lives for the entire duration of the application.
 pub struct State {
-    /// Internal in-memory database used to store all messages and users.
-    db: Mutex<Database>,
+    /// Handle to the postgres connection pool.
+    db: Database,
     /// Sending-half of the channel used to broadcast messages to all
     /// connected websocket clients.
     tx: Sender<Message>,
 }
+
+/// This type alias is used by all route handlers that are fallible.
+pub type Result<T> = std::result::Result<T, (StatusCode, String)>;
 
 /// This type alias is used by all route handlers using the global state.
 pub type StateExt = Extension<Arc<State>>;
 
 impl State {
     /// This constructor, called once at startup, initializes the global state.
-    ///
-    /// The internal database stores `max_history` messages if specified,
-    /// or all messages forever if not specified.
-    fn new(max_history: Option<usize>) -> Self {
+    fn new() -> Self {
         Self {
-            db: Mutex::new(Database::new(max_history)),
+            db: Database::new(),
             tx: tokio::sync::broadcast::channel(1000).0,
         }
     }
@@ -56,14 +44,11 @@ impl State {
 /// This function is the entrypoint of the application.
 #[tokio::main]
 async fn main() {
-    // Initialize the command-line options.
-    let opt = Opt::from_args();
-
     // Initialize tracing.
     tracing_subscriber::fmt::init();
 
     // Initialize the top-level app router.
-    let app = make_app_router(opt.max_history);
+    let app = make_app_router();
 
     // Start the hyper server on port 3000.
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
@@ -74,41 +59,71 @@ async fn main() {
 }
 
 /// This function builds and returns the top-level app router.
-fn make_app_router(max_history: Option<usize>) -> Router {
-    let state = Arc::new(State::new(max_history));
+fn make_app_router() -> Router {
+    let state = Arc::new(State::new());
     let index = ServeFile::new("static/index.html");
     let assets = ServeDir::new("static");
     Router::new()
-        .route("/", get_service(index).handle_error(error_handler))
-        .nest("/static", get_service(assets).handle_error(error_handler))
+        .route("/", get_service(index).handle_error(wrap_500))
+        .nest("/static", get_service(assets).handle_error(wrap_500))
         .nest("/messages", messages::make_router())
         .nest("/users", users::make_router())
         .nest("/websocket", websocket::make_router())
         .layer(AddExtensionLayer::new(state))
 }
 
-/// This function handles I/O errors when serving static files.
+/// This function wraps IO errors when serving static file requests
+/// in a "500 Internal Server Error" http response.
 ///
 /// Normally, it should never be called.
-async fn error_handler(error: std::io::Error) -> impl IntoResponse {
-    tracing::error!("failed to serve static file: {}", error);
-    (
-        StatusCode::INTERNAL_SERVER_ERROR,
-        "Something's wrong with our server... We're on it!",
-    )
+async fn wrap_500(error: std::io::Error) -> (StatusCode, &'static str) {
+    tracing::error!("INTERNAL_SERVER_ERROR: {}", error);
+    (StatusCode::INTERNAL_SERVER_ERROR, "Something's wrong!")
+}
+
+/// This function wraps errors when serving API requests
+/// in a "400 Bad Request" http response.
+pub fn wrap_400(error: String) -> (StatusCode, String) {
+    tracing::warn!("BAD_REQUEST: {}", error);
+    (StatusCode::BAD_REQUEST, error)
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::database::POSTGRES_URI;
     use axum::Server;
     use reqwest::Client;
+    use sqlx::{Connection, PgConnection};
     use std::net::{SocketAddr, TcpListener};
+    use std::time::Duration;
 
-    /// Initialize reqwest client, and hyper server on a random port.
-    pub fn start_client_and_server() -> (Client, SocketAddr) {
+    /// Initialize the reqwest client, and the hyper server on a random port.
+    ///
+    /// Each unit test calls this function, which is why we need to start the
+    /// hyper server on a random port. Also, we need to reset both tables because
+    /// each unit test assumes that there are no messages and no users.
+    pub async fn start_client_and_server() -> (Client, SocketAddr) {
+        let mut retries = 0;
+        let mut conn = loop {
+            match PgConnection::connect(POSTGRES_URI).await {
+                Ok(conn) => break conn,
+                Err(_) => {
+                    retries += 1;
+                    if retries == 10 {
+                        panic!("Failed to connect to posgres after 10 retries");
+                    }
+                    tokio::time::sleep(Duration::from_secs(1)).await
+                }
+            }
+        };
+        sqlx::query("TRUNCATE messages, users CASCADE")
+            .execute(&mut conn)
+            .await
+            .unwrap();
+
         let listener = TcpListener::bind("0.0.0.0:0").unwrap();
         let server_addr = listener.local_addr().unwrap();
-        let app = crate::make_app_router(None);
+        let app = crate::make_app_router();
         tokio::spawn(async move {
             Server::from_tcp(listener)
                 .unwrap()
@@ -116,6 +131,7 @@ mod tests {
                 .await
                 .unwrap()
         });
+
         (Client::new(), server_addr)
     }
 }

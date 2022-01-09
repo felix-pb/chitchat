@@ -1,7 +1,7 @@
 //! This module is responsible for the `/users` endpoint.
 
 use crate::database::User;
-use crate::StateExt;
+use crate::{wrap_400, Result, StateExt};
 use axum::routing::post;
 use axum::{Json, Router};
 
@@ -13,9 +13,9 @@ pub fn make_router() -> Router {
 /// This function handles the `POST /users` requests.
 ///
 /// It creates and returns a new user with a unique ID and a random password.
-async fn create_user(state: StateExt) -> Json<User> {
-    let created_user = state.db.lock().create_user();
-    Json(created_user)
+async fn create_user(state: StateExt) -> Result<Json<User>> {
+    let created_user = state.db.create_user().await.map_err(wrap_400)?;
+    Ok(Json(created_user))
 }
 
 #[cfg(test)]
@@ -33,7 +33,7 @@ pub mod tests {
 
     #[tokio::test]
     async fn it_creates_two_users() {
-        let (client, addr) = crate::tests::start_client_and_server();
+        let (client, addr) = crate::tests::start_client_and_server().await;
 
         let user1 = create_user(&client, addr).await;
         let user2 = create_user(&client, addr).await;

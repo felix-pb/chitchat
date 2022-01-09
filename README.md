@@ -37,33 +37,38 @@ Top-level project structure:
 
 # How to build and run the app?
 
-Note: if you don't have `make` installed, you can run the equivalent commands in `Makefile`.
-
-1. Build the app as a docker image:
+1. Build the app compose file:
 ```
-make build
+docker compose build
 ```
 
-2. Run the app as a docker container:
+2. Start the app compose file:
 ```
-make run
+docker compose up
 ```
 
 3. Use the app on http://localhost:3000.
 
-4. Stop the app and remove its docker container:
+4. Stop the app compose file:
 ```
-make stop
+docker compose down
 ```
 
 # How to test the app?
 
-All tests must pass when building with docker as described above.
-Otherwise, the build fails!
-
-However, you can still quickly run all tests without building the full docker image:
+1. Build the test compose file:
 ```
-cargo test
+docker compose -f docker-compose.test.yaml build
+```
+
+2. Start the test compose file:
+```
+docker compose -f docker-compose.test.yaml up
+```
+
+3. Stop the test compose file:
+```
+docker compose -f docker-compose.test.yaml down
 ```
 
 # How to format and lint the app?
@@ -79,33 +84,3 @@ cargo clippy
 cd vue/
 npm run lint
 ```
-
-# How to build and run the app during development?
-
-Note: if you don't have `cargo-watch` installed, you can install it with `cargo install cargo-watch`.
-
-1. If you haven't done so, install the frontend dependencies:
-```
-cd vue/ && npm ci
-```
-
-2. Build the frontend static files in watch mode:
-```
-npm run dev
-```
-
-3. In a separate terminal, build and run the backend server in watch mode:
-```
-cargo watch -x run
-```
-
-# Next steps
-
-- Authentication
-- HTTPS
-- Persistence
-- CI pipeline
-- Better logging
-- Refactor tests
-- Generate OpenAPI definitions
-- Add more features (e.g. rooms, pagination or infinite scrolling, etc.)
