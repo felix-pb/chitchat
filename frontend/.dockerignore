@@ -1,2 +1,6 @@
 /dist
 /node_modules
+Dockerfile
+Dockerfile.lint
+Dockerfile.watch
+Makefile
