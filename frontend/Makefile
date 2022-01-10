@@ -1,5 +1,6 @@
-IMAGE := chitchat-frontend:latest
+IMAGE := chitchat_frontend:latest
 CONTAINER := chitchat-frontend-1
+NETWORK := chitchat_net
 
 run:
 	docker build --tag ${IMAGE} .
@@ -7,7 +8,7 @@ run:
 	docker run \
 	--detach \
 	--name ${CONTAINER} \
-	--network chitchat-net \
+	--network ${NETWORK} \
 	--publish 8080:8080 \
 	--rm \
 	${IMAGE}
@@ -31,7 +32,7 @@ watch:
 	docker run \
 	--detach \
 	--name ${CONTAINER} \
-	--network chitchat-net \
+	--network ${NETWORK} \
 	--publish 8080:8080 \
 	--rm \
 	--volume $(shell pwd)/src:/app/src \

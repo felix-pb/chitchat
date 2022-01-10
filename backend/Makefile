@@ -1,5 +1,6 @@
-IMAGE := chitchat-backend:latest
+IMAGE := chitchat_backend:latest
 CONTAINER := chitchat-backend-1
+NETWORK := chitchat_net
 
 run:
 	docker build --tag ${IMAGE} .
@@ -8,7 +9,7 @@ run:
 	--detach \
 	--init \
 	--name ${CONTAINER} \
-	--network chitchat-net \
+	--network ${NETWORK} \
 	--publish 3000:3000 \
 	--rm \
 	${IMAGE}
@@ -31,7 +32,7 @@ test:
 
 	docker run \
 	--name ${CONTAINER} \
-	--network chitchat-net \
+	--network ${NETWORK} \
 	--rm \
 	${IMAGE} \
 	cargo test -- --test-threads=1
@@ -43,7 +44,7 @@ watch:
 	--detach \
 	--init \
 	--name ${CONTAINER} \
-	--network chitchat-net \
+	--network ${NETWORK} \
 	--publish 3000:3000 \
 	--rm \
 	--volume $(shell pwd)/src:/app/src \

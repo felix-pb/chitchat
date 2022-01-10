@@ -1,5 +1,7 @@
-IMAGE := chitchat-postgres:latest
+IMAGE := chitchat_postgres:latest
 CONTAINER := chitchat-postgres-1
+NETWORK := chitchat_net
+VOLUME := chitchat_data
 
 run:
 	docker build --tag ${IMAGE} .
@@ -9,10 +11,10 @@ run:
 	--detach \
 	--hostname postgres \
 	--name ${CONTAINER} \
-	--network chitchat-net \
+	--network ${NETWORK} \
 	--publish 5432:5432 \
 	--rm \
-	--volume chitchat-data:/var/lib/postgresql/data \
+	--volume ${VOLUME}:/var/lib/postgresql/data \
 	${IMAGE}
 
 stop:

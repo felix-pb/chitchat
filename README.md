@@ -76,7 +76,7 @@ docker compose -f docker-compose.lint.yaml down
 
 # How to work with chitchat services individually?
 
-Alternativey, you can run (in production or in development/watch mode), test and
+Alternatively, you can run (in production or development/watch mode), test and
 lint each service individually. However, note that the `frontend` service depends
 on the `backend` service, which in turn depends on the `postgres` service.
 
@@ -84,5 +84,5 @@ For more details, check the `Makefile` in each service's subdirectory.
 
 The services must share a network, which can be created with:
 ```
-docker network create chitchat-net
+docker network create chitchat_net
 ```
