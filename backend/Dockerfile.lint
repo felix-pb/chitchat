@@ -1,0 +1,8 @@
+FROM rust:1.57.0
+WORKDIR /app
+RUN rustup component add clippy rustfmt
+RUN cargo init
+COPY Cargo.toml Cargo.lock ./
+RUN cargo fmt && cargo clippy
+COPY . .
+RUN touch src/main.rs && cargo fmt && cargo clippy

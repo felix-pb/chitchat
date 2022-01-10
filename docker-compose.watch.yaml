@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  # backend service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.watch
+    command: cargo watch -x run
+    depends_on:
+      - postgres
+    init: true
+    ports:
+      - 3000:3000
+    volumes:
+      - ./backend/src:/app/src
+
+  # frontend service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.watch
+    command: npm run serve
+    depends_on:
+      - backend
+    ports:
+      - 8080:8080
+    volumes:
+      - ./frontend/src:/app/src
+
+  # postgres service
+  postgres:
+    build:
+      context: ./postgres
+    environment:
+      - POSTGRES_PASSWORD=password
+    ports:
+      - 5432:5432
+    volumes:
+      - data:/var/lib/postgresql/data
+
+volumes:
+  data:

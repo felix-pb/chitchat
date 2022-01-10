@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  # backend service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.test
+    command: cargo test -- --test-threads=1
+    depends_on:
+      - postgres
+
+  # postgres service
+  postgres:
+    build:
+      context: ./postgres
+    environment:
+      - POSTGRES_PASSWORD=password
+    ports:
+      - 5432:5432
+    volumes:
+      - data:/var/lib/postgresql/data
+
+volumes:
+  data:
