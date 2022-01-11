@@ -1,4 +1,6 @@
-Quick note: the original version of this project is now located in the `in-memory-db` branch.
+Quick note: the original version of this project is now located in the [`in-memory-db`][0] branch.
+
+[0]: https://github.com/felix-pb/chitchat/tree/in-memory-db
 
 # ChitChat
 
