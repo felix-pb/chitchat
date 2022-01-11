@@ -1,3 +1,5 @@
+Quick note: the original version of this project is now located in the `in-memory-db` branch.
+
 # ChitChat
 
 A simple web app to engage in trivial matters, i.e. to chitchat.
